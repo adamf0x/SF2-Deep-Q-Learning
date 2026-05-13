@@ -102,14 +102,14 @@ class SFEnv(Env):
         p2_round_wins = self.current_obs["p2RoundWins"]
         terminated = False
         if self.metadata["player1"]:
-            if p1_health == 255 and p2_health != 255 and p2_round_wins == 2:
+            if p1_health == 255 and p2_health != 255 and p2_round_wins >= 2:
                 terminated = True
             if p1_health < 255 and p2_health < 255:
                 reward = p1_health - p2_health
             else:
                 reward = 0
         else:
-            if p2_health == 255 and p1_health != 255 and p1_round_wins == 2:
+            if p2_health == 255 and p1_health != 255 and p1_round_wins >= 2:
                 terminated = True
             if p1_health < 255 and p2_health < 255:
                 reward = p2_health - p1_health
