@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SFAutomation": {
+      "commandName": "Project",
+      "commandLineArgs": ".\\EmuHawk.exe --open-ext-tool-dll=SFAutomation"
+    }
+  }
+}
