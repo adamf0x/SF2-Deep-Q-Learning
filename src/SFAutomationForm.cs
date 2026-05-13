@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Windows.Forms;
 
-// Player data class for state observations 
+// player data class for state observations 
 public class PlayerData
 {
     public long p1Health {  get; set; }
@@ -116,6 +116,7 @@ public class PlayerData
 [ExternalTool("SFAutomation")]
 public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
 {
+    // relevant memory addresses for observations 
     private long p1HPAddr = 0x000530;
     private long p2HPAddr = 0x000730;
     private long p1Action = 0x000503;
@@ -158,7 +159,7 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
     private Socket.SocketServer socketServer = new();
     private bool reseting = false;
 
-    // Possible inputs for SNES controller
+    // possible inputs for SNES controller
     private enum INPUTS
     {
         forward,
@@ -251,7 +252,7 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
         this.roundTimer = ReadMemory(this.roundTimerAddr);
 
 
-        // Press start button ever 60 frames while in between episodes
+        // press start button ever 60 frames while in between episodes
         if (this.roundTimer == 0)
         {
             if (this.player2 == false && framesElapsed % 60 == 0)
@@ -324,7 +325,7 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
             this.player2 = true;
         }
 
-        //Initialize reset of game state (soft reset)
+        // initialize reset of game state (soft reset)
         if (action == "reset" && player2 == false)
         {
             moveQueue.Clear();
@@ -396,7 +397,7 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
     }   
     
     /*
-     * Set the input dictionary values and perform the input
+     * Set the input dictionary values and perform the input.
      */
     private void PerformInput(bool player1, Dictionary<string, bool> inputDict, string inputType, bool facingLeft)
     {

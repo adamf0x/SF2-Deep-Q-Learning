@@ -137,8 +137,6 @@ class SFEnv(Env):
         self.obs_received.clear()
 
         self.run_async(self.socket.send_reset())
-        # playerStr = "player1" if self.metadata["player1"] == True else "player2"
-        # self.run_async(self.socket.send_player(playerStr))
 
         if not self.obs_received.wait(timeout=60):
             raise TimeoutError("Did not receive initial observation")
