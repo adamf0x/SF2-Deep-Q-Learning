@@ -1,5 +1,7 @@
 # SF2 Deep Q-Learning
 
+<img width="583" height="386" alt="sf2" src="https://github.com/user-attachments/assets/d2bb2bef-0d7e-494a-be2a-beea062b1bfb" />
+
 Implementation of the Deep Q-Learning algorithm trained on the Street Fighter 2 Turbo arcade mode. 
 
 ## Running
