@@ -32,8 +32,8 @@ public class PlayerData
     public long p2DistanceFromEnemy { get; set; }
     public long p1FacingLeft { get; set; }
     public long p2FacingLeft { get; set; }
-    public long p1Fireball { get; set; }
-    public long p2Fireball { get; set; }
+    public long p1FireballPosition { get; set; }
+    public long p2FireballPosition { get; set; }
     public long p1XPos { get; set; }
     public long p2XPos { get; set; }
     public long p1YPos { get; set; }
@@ -66,8 +66,8 @@ public class PlayerData
        long p2DistanceFromEnemy,
        long p1FacingLeft,
        long p2FacingLeft,
-       long p1Fireball,
-       long p2Fireball,
+       long p1FireballPosition,
+       long p2FireballPosition,
        long p1XPos,
        long p2XPos,
        long p1YPos,
@@ -100,8 +100,8 @@ public class PlayerData
         this.p2DistanceFromEnemy = p2DistanceFromEnemy;
         this.p1FacingLeft = p1FacingLeft;
         this.p2FacingLeft = p2FacingLeft;
-        this.p1Fireball = p1Fireball;
-        this.p2Fireball = p2Fireball;
+        this.p1FireballPosition = p1FireballPosition;
+        this.p2FireballPosition = p2FireballPosition;
         this.p1XPos = p1XPos;
         this.p2XPos = p2XPos;
         this.p1YPos = p1YPos;
@@ -139,8 +139,8 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
     private long p2DistanceFromEnemy = 0x0007EB;
     private long p1FacingLeft = 0x0005F3;
     private long p2FacingLeft = 0x0007F3;
-    private long p1Fireball = 0x0005F7;
-    private long p2Fireball = 0x0007F7;
+    private long p1FireballPosition = 0x000907;
+    private long p2FireballPosition = 0x000957;
     private long p1XPos = 0x000507;
     private long p2XPos = 0x000707;
     private long p1YPos = 0x00050A;
@@ -238,8 +238,8 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
         long p2DistanceFromEnemy = ReadMemory(this.p2DistanceFromEnemy);
         long p1FacingLeft = ReadMemory(this.p1FacingLeft);
         long p2FacingLeft = ReadMemory(this.p2FacingLeft);
-        long p1Fireball = ReadMemory(this.p1Fireball);
-        long p2Fireball = ReadMemory(this.p2Fireball);
+        long p1FireballPosition = ReadMemory(this.p1FireballPosition);
+        long p2FireballPosition = ReadMemory(this.p2FireballPosition);
         long p1XPos = ReadMemory(this.p1XPos);
         long p2XPos = ReadMemory(this.p2XPos);
         long p1YPos = ReadMemory(this.p1YPos);
@@ -297,8 +297,8 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
             p2DistanceFromEnemy,
             p1FacingLeft,
             p2FacingLeft,
-            p1Fireball,
-            p2Fireball,
+            p1FireballPosition,
+            p2FireballPosition,
             p1XPos,
             p2XPos,
             p1YPos,
