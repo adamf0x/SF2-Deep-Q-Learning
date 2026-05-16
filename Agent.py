@@ -40,6 +40,7 @@ class Agent:
         self.learning_rate_a = hyperparameters["learning_rate_a"]
         self.discount_factor_g = hyperparameters["discount_factor_g"]
         self.network_sync_rate = hyperparameters["network_sync_rate"]
+        self.enable_double_dqn = hyperparameters["enable_double_dqn"]
 
         self.MODEL_FILE = os.path.join(RUNS_DIR, f"{self.hyperparameters_set}.pt")
 
@@ -151,13 +152,24 @@ class Agent:
         terminations = torch.tensor(terminations).float().to(device)
 
         with torch.no_grad():
-            # Calculate target Q values (expected returns)
-            target_q = (
-                rewards
-                + (1 - terminations)
-                * self.discount_factor_g
-                * target_net(new_states).max(dim=1)[0]
-            )
+            if self.enable_double_dqn:
+                best_actions_from_policy = policy_net(new_states).argmax(dim=1)
+                target_q = (
+                    rewards
+                    + (1 - terminations)
+                    * self.discount_factor_g
+                    * target_net(new_states)
+                    .gather(dim=1, index=best_actions_from_policy.unsqueeze(dim=1))
+                    .squeeze()
+                )
+            else:
+                # Calculate target Q values (expected returns)
+                target_q = (
+                    rewards
+                    + (1 - terminations)
+                    * self.discount_factor_g
+                    * target_net(new_states).max(dim=1)[0]
+                )
 
         # Calcuate Q values from current policy
         current_q = (
