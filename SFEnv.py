@@ -11,6 +11,17 @@ import numpy as np
 
 class SFEnv(Env):
     metadata = {"render_modes": ["human"], "render_fps": 60, "player1": True}
+    special_moves = {
+        "LHADOUKEN",
+        "LSHORYUKEN",
+        "LTATSU",
+        "MHADOUKEN",
+        "MSHORYUKEN",
+        "MTATSU",
+        "HHADOUKEN",
+        "HSHORYUKEN",
+        "HTATSU",
+    }
 
     def __init__(self, websocket_uri="ws://localhost:8080", render_mode=None):
         self.websocket_uri = websocket_uri
@@ -42,7 +53,7 @@ class SFEnv(Env):
         while self.loop is None:
             threading.Event().wait(0.01)
 
-    def run_async(self, coroutine, timeout=1):
+    def run_async(self, coroutine, timeout=2):
         if self.loop is None or self.loop.is_closed():
             raise RuntimeError("Event loop not running")
 
@@ -86,8 +97,7 @@ class SFEnv(Env):
 
         action_name = PlayerActions(action).name
 
-        if self.frames_elapsed % 20 == 0:
-            self.run_async(self.socket.send_perform_action_request(action_name))
+        self.run_async(self.socket.send_perform_action_request(action_name))
 
         if not self.obs_received.wait(timeout=30.0):
             raise TimeoutError("Did not receive observation in step")
@@ -105,14 +115,20 @@ class SFEnv(Env):
             if p1_health == 255 and p2_health != 255 and p2_round_wins >= 2:
                 terminated = True
             if p1_health < 255 and p2_health < 255:
-                reward = p1_health - p2_health
+                if p1_health > p2_health:
+                    reward = 1
+                else:
+                    reward = -1
             else:
                 reward = 0
         else:
             if p2_health == 255 and p1_health != 255 and p1_round_wins >= 2:
                 terminated = True
             if p1_health < 255 and p2_health < 255:
-                reward = p2_health - p1_health
+                if p1_health < p2_health:
+                    reward = 1
+                else:
+                    reward = -1
             else:
                 reward = 0
 
@@ -202,6 +218,43 @@ class SFEnv(Env):
                 obs_dict["p2RoundWins"] / 3.0,
             ],
             dtype=np.float32,
+        )
+
+    def player_is_actionable(
+        self,
+        player_action: int,
+        round_timer: int | None,
+        p1_health: int,
+        p2_health: int,
+        execution_frames: int,
+        air_action_available: bool,
+    ) -> bool:
+
+        if player_action == 4 and air_action_available:
+            return execution_frames == 0 and self.round_active(
+                round_timer, p1_health, p2_health
+            )
+        elif player_action != 4:
+            return (
+                (player_action == 0 or player_action == 2)
+                and execution_frames == 0
+                and self.round_active(round_timer, p1_health, p2_health)
+            )
+        else:
+            return (
+                (player_action == 0 or player_action == 4 or player_action == 2)
+                and execution_frames == 0
+                and self.round_active(round_timer, p1_health, p2_health)
+            )
+
+    def round_active(
+        self, round_timer: int | None, p1_health: int, p2_health: int
+    ) -> bool:
+        return (
+            round_timer > 0
+            and round_timer <= 152
+            and p1_health != 255
+            and p2_health != 255
         )
 
 

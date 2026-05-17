@@ -47,7 +47,7 @@ class Agent:
         self.loss_fn = nn.MSELoss()
         self.optimizer = None
 
-    def run(self, is_training=True, useModel=False, render=False, player1=True):
+    def run(self, is_training=True, render=False, player1=True):
         p = subprocess.Popen(["bash", "-c", "./launch.sh"])
         time.sleep(
             3
@@ -70,19 +70,6 @@ class Agent:
                 policy_net.parameters(), lr=self.learning_rate_a
             )
             best_reward = -9999999999
-        elif is_training and useModel:
-            memory = ReplayMemory(self.replay_memory_size)
-            epsilon = self.epsilon_init
-            target_net = DQN(env).to(device)
-            target_net.load_state_dict(policy_net.state_dict())
-
-            step_count = 0
-
-            self.optimizer = torch.optim.Adam(
-                policy_net.parameters(), lr=self.learning_rate_a
-            )
-            best_reward = -9999999999
-            policy_net.load_state_dict(torch.load(self.MODEL_FILE))
         else:
             policy_net.load_state_dict(torch.load(self.MODEL_FILE))
             policy_net.eval()
@@ -124,7 +111,7 @@ class Agent:
 
                     if episode % 10 == 0:
                         print(
-                            f"Average previous 10 episodes reward at episode {episode}: {np.mean(rewards_per_episode)}"
+                            f"Average reward at episode {episode}: {np.mean(rewards_per_episode)}"
                         )
                     epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
                     epsilon_history.append(epsilon)
@@ -134,7 +121,8 @@ class Agent:
                         step_count = 0
 
         env.close()
-        p.terminate
+        p.terminate()
+        p.wait()
 
     def optimize(self, mini_batch, policy_net, target_net):
         # Transpose the list of experiences and separate each element
@@ -182,6 +170,7 @@ class Agent:
 
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(policy_net.parameters(), max_norm=1.0)
         self.optimizer.step()
 
 

@@ -1,4 +1,4 @@
-﻿namespace Net.MyStuff.MyTool;
+﻿namespace Net.MyStuff.SFAutomation;
 
 using BizHawk.Client.Common;
 using BizHawk.Client.EmuHawk;
@@ -42,6 +42,7 @@ public class PlayerData
     public long p2YVelocity { get; set; }
     public long p1RoundWins { get; set; }
     public long p2RoundWins { get; set; }
+    public long roundTimer { get; set; }
 
     public PlayerData(
        long p1Health,
@@ -75,7 +76,8 @@ public class PlayerData
        long p1YVelocity,
        long p2YVelocity,
        long p1RoundWins,
-       long p2RoundWins
+       long p2RoundWins,
+       long roundTimer
     )
     {
         this.p1Health = p1Health;
@@ -110,6 +112,7 @@ public class PlayerData
         this.p2YVelocity = p2YVelocity;
         this.p1RoundWins = p1RoundWins;
         this.p2RoundWins = p2RoundWins;
+        this.roundTimer = roundTimer;
     }
 }
 
@@ -149,9 +152,7 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
     private long p2YVelocity = 0x00072F;
     private long p1RoundWins = 0x0005D0;
     private long p2RoundWins = 0x0007D0;
-
     private long roundTimerAddr = 0x0018F3;
-    private long? roundTimer = null;
 
     private PlayerData? playerData;
     private Dictionary<string, bool>? inputDict;
@@ -178,8 +179,8 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
         R
     }
     private Queue<string> moveQueue = new();
-    private int executionFrames = 0;
-    private bool airActionAvailable = true;
+    //private int executionFrames = 0;
+    //private bool airActionAvailable = true;
     private bool player2 = false;
     private string[] lshoryuken = ["FORWARD", "DOWN", "DOWNFORWARD+Y"];
     private string[] lhadouken = ["DOWN", "DOWNFORWARD", "FORWARD+Y"];
@@ -248,12 +249,11 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
         long p2YVelocity = ReadMemory(this.p2YVelocity);
         long p1RoundWins = ReadMemory(this.p1RoundWins);
         long p2RoundWins = ReadMemory(this.p2RoundWins);
-
-        this.roundTimer = ReadMemory(this.roundTimerAddr);
+        long roundTimer = ReadMemory(this.roundTimerAddr);
 
 
         // press start button ever 60 frames while in between episodes
-        if (this.roundTimer == 0)
+        if (roundTimer == 0)
         {
             if (this.player2 == false && framesElapsed % 60 == 0)
             {
@@ -306,7 +306,8 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
             p1YVelocity,
             p2YVelocity,
             p1RoundWins,
-            p2RoundWins
+            p2RoundWins,
+            roundTimer
          );
 
         string jsonPlayerData = JsonSerializer.Serialize(playerData);
@@ -339,47 +340,21 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
             inputDict = InitInputDict();
             if (this.player2 == false)
             {
-                if (PlayerIsActionable(p1Action, this.roundTimer, p1Health, p2Health, executionFrames, airActionAvailable))
-                {
-                    AddToMoveQueue(action);
-                }
+                AddToMoveQueue(action);
                 if (moveQueue.Count > 0)
                 {
                     string inputForFrame = moveQueue.Dequeue();
                     PerformInput(this.player2 == false, inputDict, inputForFrame, p1FacingLeft == 0);
                 }
-                if (p1Action == 4)
-                {
-                    airActionAvailable = false;
-                }
-                if (p1Action == 0 || p1Action == 2)
-                {
-                    airActionAvailable = true;
-                }
             }
             else
             {
-                if (PlayerIsActionable(p2Action, this.roundTimer, p1Health, p2Health, executionFrames, airActionAvailable))
-                {
-                    AddToMoveQueue(action);
-                }
+                AddToMoveQueue(action);
                 if (moveQueue.Count > 0)
                 {
                     string inputForFrame = moveQueue.Dequeue();
                     PerformInput(this.player2 == false, inputDict, inputForFrame, p2FacingLeft == 0);
                 }
-                if (p2Action == 4)
-                {
-                    airActionAvailable = false;
-                }
-                if (p2Action == 0 || p2Action == 2)
-                {
-                    airActionAvailable = true;
-                }
-            }
-            if (executionFrames > 0)
-            {
-                executionFrames -= 1;
             }
         }
         framesElapsed += 1;
@@ -592,6 +567,9 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
                 case ("R"):
                     inputDict[player + " R"] = true;
                     break;
+                default:
+                    inputDict = InitInputDict();
+                    break;
             }
         }
         APIs.Joypad.Set(inputDict);
@@ -669,91 +647,60 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
                 moveQueue.Enqueue("DOWN+R");
                 break;
             case ("LHADOUKEN"):
-                executionFrames = 3;
                 foreach (string i in lhadouken)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("LSHORYUKEN"):
-                executionFrames = 3;
                 foreach (string i in lshoryuken)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("LTATSU"):
-                executionFrames = 3;
                 foreach (string i in ltatsu)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("MHADOUKEN"):
-                executionFrames = 3;
                 foreach (string i in mhadouken)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("MSHORYUKEN"):
-                executionFrames = 3;
                 foreach (string i in mshoryuken)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("MTATSU"):
-                executionFrames = 3;
                 foreach (string i in mtatsu)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("HHADOUKEN"):
-                executionFrames = 3;
                 foreach (string i in hhadouken)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("HSHORYUKEN"):
-                executionFrames = 3;
                 foreach (string i in hshoryuken)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
             case ("HTATSU"):
-                executionFrames = 3;
                 foreach (string i in htatsu)
                 {
                     moveQueue.Enqueue(i);
                 }
                 break;
         }
-    }
-
-    // Check relevant player state to see if inputs can be executed by the player
-    private bool PlayerIsActionable(long playerAction, long? roundTimer, long p1Health, long p2Health, int executionFrames, bool airActionAvailable)
-    {
-        if (playerAction == 4 && airActionAvailable)
-        {
-            return executionFrames == 0 && RoundActive(roundTimer, p1Health, p2Health);
-        }
-        else if (playerAction != 4)
-        {
-            return (playerAction == 0 || playerAction == 2) && executionFrames == 0 && RoundActive(roundTimer, p1Health, p2Health);
-        }
-        else
-        {
-            return (playerAction == 0 || playerAction == 4 || playerAction == 2) && executionFrames == 0 && RoundActive(roundTimer, p1Health, p2Health);
-        } 
-    }
-
-    private bool RoundActive(long? roundTimer, long p1Health, long p2Health)
-    {
-        return roundTimer > 0 && roundTimer <= 152 && p1Health != 255 && p2Health != 255;
     }
 
     private Dictionary<string, bool> InitInputDict()
