@@ -122,7 +122,6 @@ class Agent:
 
         env.close()
         p.terminate()
-        p.wait()
 
     def optimize(self, mini_batch, policy_net, target_net):
         # Transpose the list of experiences and separate each element
@@ -175,5 +174,5 @@ class Agent:
 
 
 if __name__ == "__main__":
-    agent = Agent("sf2[1]")
+    agent = Agent("sf2[2]")
     agent.run(is_training=True)

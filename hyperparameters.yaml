@@ -1,9 +1,9 @@
-sf2[1]:
+sf2[2]:
   env_id: sf-automation-v0
   replay_memory_size: 1000000
   mini_batch_size: 32
   epsilon_init: 1.0
-  epsilon_decay: 0.9995
+  epsilon_decay: 0.99
   network_sync_rate: 100
   epsilon_min: 0.05
   learning_rate_a: 0.001

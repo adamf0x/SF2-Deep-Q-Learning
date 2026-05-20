@@ -17,8 +17,11 @@ class SocketConnection:
         return False
 
     async def send_perform_action_request(self, action):
-        if self.ws and self.is_connected:
-            return await self.ws.send(action)
+        try:
+            if self.ws and self.is_connected:
+                return await self.ws.send(action)
+        except websockets.exceptions.ConnectionClosed:
+            print("Connection closed during perform action")
         return False
 
     async def send_player(self, player1):
@@ -43,7 +46,7 @@ class SocketConnection:
                 continue
 
             except websockets.exceptions.ConnectionClosed:
-                print("Connection closed")
+                print("Connection closed during receive")
                 self.is_connected = False
                 break
 

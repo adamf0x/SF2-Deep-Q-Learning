@@ -112,7 +112,7 @@ class SFEnv(Env):
         p2_round_wins = self.current_obs["p2RoundWins"]
         terminated = False
         if self.metadata["player1"]:
-            if p1_health == 255 and p2_health != 255 and p2_round_wins >= 2:
+            if p2_round_wins >= 2:
                 terminated = True
             if p1_health < 255 and p2_health < 255:
                 if p1_health > p2_health:
@@ -122,7 +122,7 @@ class SFEnv(Env):
             else:
                 reward = 0
         else:
-            if p2_health == 255 and p1_health != 255 and p1_round_wins >= 2:
+            if p1_round_wins >= 2:
                 terminated = True
             if p1_health < 255 and p2_health < 255:
                 if p1_health < p2_health:
@@ -219,33 +219,6 @@ class SFEnv(Env):
             ],
             dtype=np.float32,
         )
-
-    def player_is_actionable(
-        self,
-        player_action: int,
-        round_timer: int | None,
-        p1_health: int,
-        p2_health: int,
-        execution_frames: int,
-        air_action_available: bool,
-    ) -> bool:
-
-        if player_action == 4 and air_action_available:
-            return execution_frames == 0 and self.round_active(
-                round_timer, p1_health, p2_health
-            )
-        elif player_action != 4:
-            return (
-                (player_action == 0 or player_action == 2)
-                and execution_frames == 0
-                and self.round_active(round_timer, p1_health, p2_health)
-            )
-        else:
-            return (
-                (player_action == 0 or player_action == 4 or player_action == 2)
-                and execution_frames == 0
-                and self.round_active(round_timer, p1_health, p2_health)
-            )
 
     def round_active(
         self, round_timer: int | None, p1_health: int, p2_health: int

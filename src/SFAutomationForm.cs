@@ -4,6 +4,7 @@ using BizHawk.Client.Common;
 using BizHawk.Client.EmuHawk;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Windows.Forms;
 
@@ -253,7 +254,7 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
 
 
         // press start button ever 60 frames while in between episodes
-        if (roundTimer == 0)
+        if (roundTimer == 0 && reseting == true)
         {
             if (this.player2 == false && framesElapsed % 60 == 0)
             {
@@ -269,7 +270,7 @@ public sealed class SFAutomationForm : ToolFormBase, IExternalToolForm
                 APIs.Joypad.Set(inputDict);
             }
         }
-        else
+        else if (roundTimer != 0 && reseting == true)
         {
             reseting = false;
         }
